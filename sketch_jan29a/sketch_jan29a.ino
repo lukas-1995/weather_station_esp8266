@@ -3,11 +3,12 @@
 #include <Adafruit_BMP280.h>
 #include <Wire.h>
 #include <BH1750.h>
-#include <SimpleDHT.h>
+#include <DHT.h>
 #define BMP280_I2C_ADDRESS 0x76
+#define DHTTYPE DHT22
+#define DHTPIN 5
+DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP280 bmp280;
-int pinDHT22 = 5;
-SimpleDHT22 dht22(pinDHT22);
 BH1750 lightMeter;
 const int rainDigitalPin = 14;
 const int rainAnalogPin = A0;
@@ -49,6 +50,7 @@ void setup(void)
                   Adafruit_BMP280::SAMPLING_X1,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_OFF,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_4000); /* Standby time. */
+  dht.begin();  
 }
 void loop()
 {
@@ -68,11 +70,8 @@ void loop()
   float temp     = bmp280.readTemperature();
   float pressure = bmp280.readPressure();
   float hpa = pressure / 100;
-  float temperature = 0;
-  float humidity = 0;
-  int err = dht22.read2(&temperature, &humidity, NULL);
-  float temp2 = (float)temperature;
-  float humid = (float)humidity;
+  float temp2 = dht.readTemperature();
+  float humid = dht.readHumidity();
   float lux = lightMeter.readLightLevel();
   Serial.print("Light: ");
   Serial.print(lux);
